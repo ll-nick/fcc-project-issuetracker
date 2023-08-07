@@ -6,6 +6,7 @@ const server = require('../server');
 chai.use(chaiHttp);
 
 suite('Functional Tests', function () {
+
   test('Post valid issue with optional fields', function (done) {
     chai
       .request(server)
@@ -73,4 +74,51 @@ suite('Functional Tests', function () {
         done();
       });
   });
+
+  test('get without filter', function (done) {
+    chai
+      .request(server)
+      .keepOpen()
+      .get('/api/issues/test_project')
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.typeOf(res.body, 'array');
+        assert.isAtLeast(res.body.length, 2)
+        done();
+      });
+  });
+
+  test('get without single filter', function (done) {
+    chai
+      .request(server)
+      .keepOpen()
+      .get('/api/issues/test_project')
+      .query({
+        issue_title: "a",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.typeOf(res.body, 'array');
+        assert.isAtLeast(res.body.length, 2)
+        done();
+      });
+  });
+
+  test('get without multiple filters', function (done) {
+    chai
+      .request(server)
+      .keepOpen()
+      .get('/api/issues/test_project')
+      .query({
+        issue_title: "a",
+        status_text: "e",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        assert.typeOf(res.body, 'array');
+        assert.isAtLeast(res.body.length, 1)
+        done();
+      });
+  });
+
 });
