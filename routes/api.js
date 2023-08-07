@@ -1,12 +1,16 @@
 'use strict';
 
+const { Issue, saveNewIssue } = require('../db');
+
 module.exports = function (app) {
 
   app.route('/api/issues/:project')
   
-    .get(function (req, res){
-      let project = req.params.project;
-      
+    .get(async (req, res) => {
+      let searchParams = req.query;
+      searchParams.project = req.params.project;
+      let issues = await Issue.find(searchParams);
+      res.json(issues);
     })
     
     .post(function (req, res){
