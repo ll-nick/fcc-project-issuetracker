@@ -44,9 +44,31 @@ module.exports = function (app) {
       
     })
     
-    .put(function (req, res){
-      let project = req.params.project;
+    .put(async (req, res) => {
+      try {
+        let id = req.body._id;
+        if (!id) throw new Error('missing _id')
+
+        let update = {};
+        Object.keys(req.body).forEach(key => {
+          if (req.body[key] !== "" && key !== "_id") update[key] = req.body[key]
+        })
+        if (Object.keys(update).length === 0) throw new Error('no update field(s) sent')
+        update["updated_on"] = new Date().toISOString();
+
+        await Issue.findOneAndUpdate(
+          { project: req.params.project, _id: id },
+          update
+        );
+
+        res.json({
+          result: 'successfully updated',
+          _id: id
+        })
       
+      } catch (err) {
+        res.json({ error: err.message });
+      }
     })
     
     .delete(function (req, res){
