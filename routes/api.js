@@ -61,14 +61,11 @@ module.exports = function (app) {
         }
         update["updated_on"] = new Date().toISOString();
 
-        try {
-          await Issue.findOneAndUpdate(
-            { project: req.params.project, _id: id },
-            update
-          );
-        } catch {
-          throw new Error(JSON.stringify({ error: 'could not update', _id: id }))
-        }
+        let issue = await Issue.findOneAndUpdate(
+          { project: req.params.project, _id: id },
+          update
+        );
+        if (!issue) throw new Error(JSON.stringify({ error: 'could not update', _id: id }))
 
         res.json({
           result: 'successfully updated',
@@ -85,11 +82,8 @@ module.exports = function (app) {
         let id = req.body._id;
         if (!id) throw new Error(JSON.stringify({ error: 'missing _id' }))
 
-        try {
-          await Issue.deleteOne({ _id: id })
-        } catch {
-          throw new Error(JSON.stringify({ error: 'could not delete', _id: id }))
-        }
+        let issue = await Issue.findOneAndDelete({ _id: id })
+        if (!issue) throw new Error(JSON.stringify({ error: 'could not delete', _id: id }))
 
         res.json({
           result: 'successfully deleted',

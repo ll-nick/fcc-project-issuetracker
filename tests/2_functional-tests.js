@@ -274,7 +274,7 @@ suite('Functional Tests', function () {
   });
 
   test('put invalid id', function (done) {
-    let id = '123'
+    let id = '000000000000000000000000'
     chai
       .request(server)
       .keepOpen()
@@ -348,7 +348,7 @@ suite('Functional Tests', function () {
   });
 
   test('delete invalid id', function (done) {
-    let id = '123'
+    let id = '000000000000000000000000'
     chai
       .request(server)
       .keepOpen()
