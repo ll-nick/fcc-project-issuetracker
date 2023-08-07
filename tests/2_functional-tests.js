@@ -290,4 +290,77 @@ suite('Functional Tests', function () {
       });
   });
 
+  test('delete', function (done) {
+    let id;
+    chai
+      // Create a new issue
+      .request(server)
+      .keepOpen()
+      .post('/api/issues/test_project')
+      .send({
+        issue_title: "test delete issue",
+        issue_text: "b",
+        created_by: "c",
+      })
+      .end(function (err, res) {
+        // Update the issue
+        id = res.body._id
+        chai
+          .request(server)
+          .keepOpen()
+          .delete('/api/issues/test_project')
+          .send({
+            _id: id,
+          })
+          .end(function (err, res) {
+            assert.equal(res.body.result, 'successfully deleted')
+            assert.equal(res.body._id, id)
+
+            // Get issues, filter for deleted
+            chai
+              .request(server)
+              .keepOpen()
+              .get('/api/issues/test_project')
+              .query({
+                _id: id,
+              })
+              .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.type, 'application/json');
+                assert.equal(res.body.length, 0)
+                done();
+              });
+          });
+      });
+  });
+
+  test('delete missing id', function (done) {
+    let id;
+
+    chai
+      .request(server)
+      .keepOpen()
+      .delete('/api/issues/test_project')
+      .end(function (err, res) {
+        assert.equal(res.body.error, 'missing _id')
+        done();
+      });
+  });
+
+  test('delete invalid id', function (done) {
+    let id = '123'
+    chai
+      .request(server)
+      .keepOpen()
+      .delete('/api/issues/test_project')
+      .send({
+        _id: id,
+      })
+      .end(function (err, res) {
+        assert.equal(res.body.error, 'could not delete')
+        assert.equal(res.body._id, id)
+        done();
+      });
+  });
+
 });
