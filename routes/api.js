@@ -5,14 +5,14 @@ const { Issue, saveNewIssue } = require('../db');
 module.exports = function (app) {
 
   app.route('/api/issues/:project')
-  
+
     .get(async (req, res) => {
       let searchParams = req.query;
       searchParams.project = req.params.project;
       let issues = await Issue.find(searchParams);
       res.json(issues);
     })
-    
+
     .post(async (req, res) => {
       try {
         let newIssue = await saveNewIssue(
@@ -41,9 +41,9 @@ module.exports = function (app) {
       } catch (err) {
         res.json({ error: err.message });
       }
-      
+
     })
-    
+
     .put(async (req, res) => {
       try {
         let id = req.body._id;
@@ -65,15 +65,26 @@ module.exports = function (app) {
           result: 'successfully updated',
           _id: id
         })
-      
+
       } catch (err) {
         res.json({ error: err.message });
       }
     })
-    
-    .delete(function (req, res){
-      let project = req.params.project;
-      
+
+    .delete(async (req, res) => {
+      try {
+        let id = req.body._id;
+        if (!id) throw new Error('missing _id')
+
+        await Issue.deleteOne({ _id: id })
+
+        res.json({
+          result: 'successfully deleted',
+          _id: id
+        })
+      } catch (err) {
+        res.json({ error: err.message });
+      }
     });
-    
+
 };
