@@ -13,7 +13,7 @@ const issueSchema = new mongoose.Schema({
   created_by: { type: String, required: true },
   assigned_to: String,
   open: { type: Boolean, default: true },
-  states_text: String
+  status_text: String
 });
 
 const Issue = mongoose.model('Issue', issueSchema);
@@ -32,7 +32,7 @@ async function saveNewIssue(project, issueTitle, issueText, createdBy, assignedT
     updated_on: date.toISOString(),
     created_by: createdBy,
     assigned_to: assignedTo,
-    states_text: statusText
+    status_text: statusText
   });
   await newIssue.save();
   return newIssue;
