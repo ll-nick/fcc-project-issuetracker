@@ -39,7 +39,7 @@ module.exports = function (app) {
         res.json(resJson)
 
       } catch (err) {
-        res.json({ error: err.message });
+        res.json(JSON.parse(err.message));
       }
 
     })
@@ -47,19 +47,28 @@ module.exports = function (app) {
     .put(async (req, res) => {
       try {
         let id = req.body._id;
-        if (!id) throw new Error('missing _id')
+        if (!id) throw new Error(JSON.stringify({ error: 'missing _id' }))
 
         let update = {};
         Object.keys(req.body).forEach(key => {
           if (req.body[key] !== "" && key !== "_id") update[key] = req.body[key]
         })
-        if (Object.keys(update).length === 0) throw new Error('no update field(s) sent')
+        if (Object.keys(update).length === 0) {
+          throw new Error(JSON.stringify({
+            error: 'no update field(s) sent',
+            _id: id
+          }))
+        }
         update["updated_on"] = new Date().toISOString();
 
-        await Issue.findOneAndUpdate(
-          { project: req.params.project, _id: id },
-          update
-        );
+        try {
+          await Issue.findOneAndUpdate(
+            { project: req.params.project, _id: id },
+            update
+          );
+        } catch {
+          throw new Error(JSON.stringify({ error: 'could not update', _id: id }))
+        }
 
         res.json({
           result: 'successfully updated',
@@ -67,14 +76,14 @@ module.exports = function (app) {
         })
 
       } catch (err) {
-        res.json({ error: err.message });
+        res.json(JSON.parse(err.message));
       }
     })
 
     .delete(async (req, res) => {
       try {
         let id = req.body._id;
-        if (!id) throw new Error('missing _id')
+        if (!id) throw new Error(JSON.stringify({ error: 'missing _id' }))
 
         await Issue.deleteOne({ _id: id })
 
@@ -83,7 +92,7 @@ module.exports = function (app) {
           _id: id
         })
       } catch (err) {
-        res.json({ error: err.message });
+        res.json(JSON.parse(err.message));
       }
     });
 

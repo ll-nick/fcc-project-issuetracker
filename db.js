@@ -20,7 +20,7 @@ const Issue = mongoose.model('Issue', issueSchema);
 
 async function saveNewIssue(project, issueTitle, issueText, createdBy, assignedTo = "", statusText = "") {
 
-  if (!project || !issueTitle || !issueText || !createdBy) throw new Error('required field(s) missing')
+  if (!project || !issueTitle || !issueText || !createdBy) throw new Error(JSON.stringify({ error: 'required field(s) missing' }))
 
   let date = new Date();
 

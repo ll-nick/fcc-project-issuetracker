@@ -121,4 +121,173 @@ suite('Functional Tests', function () {
       });
   });
 
+  test('put one field', function (done) {
+    let id;
+    chai
+      // Create a new issue
+      .request(server)
+      .keepOpen()
+      .post('/api/issues/test_project')
+      .send({
+        issue_title: "test put one field",
+        issue_text: "b",
+        created_by: "c",
+      })
+      .end(function (err, res) {
+        // Update the issue
+        id = res.body._id
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/test_project')
+          .send({
+            _id: id,
+            issue_text: "changed in put request",
+          })
+          .end(function (err, res) {
+            assert.equal(res.body.result, 'successfully updated')
+            assert.equal(res.body._id, id)
+
+            // Get updated issue
+            chai
+              .request(server)
+              .keepOpen()
+              .get('/api/issues/test_project')
+              .query({
+                _id: id,
+              })
+              .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.type, 'application/json');
+                assert.equal(res.body[0].issue_text, 'changed in put request')
+                done();
+              });
+          });
+      });
+  });
+
+  test('put multiple fields', function (done) {
+    let id;
+    chai
+      // Create a new issue
+      .request(server)
+      .keepOpen()
+      .post('/api/issues/test_project')
+      .send({
+        issue_title: "test put multiple field",
+        issue_text: "b",
+        created_by: "c",
+      })
+      .end(function (err, res) {
+        // Update the issue
+        id = res.body._id
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/test_project')
+          .send({
+            _id: id,
+            issue_text: "changed in put request 1",
+            created_by: "changed in put request 2",
+          })
+          .end(function (err, res) {
+            assert.equal(res.body.result, 'successfully updated')
+            assert.equal(res.body._id, id)
+
+            // Get updated issue
+            chai
+              .request(server)
+              .keepOpen()
+              .get('/api/issues/test_project')
+              .query({
+                _id: id,
+              })
+              .end(function (err, res) {
+                assert.equal(res.status, 200);
+                assert.equal(res.type, 'application/json');
+                assert.equal(res.body[0].issue_text, 'changed in put request 1')
+                assert.equal(res.body[0].created_by, 'changed in put request 2')
+                done();
+              });
+          });
+      });
+  });
+
+  test('put missing id', function (done) {
+    let id;
+    chai
+      // Create a new issue
+      .request(server)
+      .keepOpen()
+      .post('/api/issues/test_project')
+      .send({
+        issue_title: "test put missing id",
+        issue_text: "b",
+        created_by: "c",
+      })
+      .end(function (err, res) {
+        // Update the issue
+        id = res.body._id
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/test_project')
+          .send({
+            issue_text: "changed in put request 1",
+            created_by: "changed in put request 2",
+          })
+          .end(function (err, res) {
+            assert.equal(res.body.error, 'missing _id')
+            done();
+          });
+      });
+  });
+
+  test('put no changes', function (done) {
+    let id;
+    chai
+      // Create a new issue
+      .request(server)
+      .keepOpen()
+      .post('/api/issues/test_project')
+      .send({
+        issue_title: "test put no changes",
+        issue_text: "b",
+        created_by: "c",
+      })
+      .end(function (err, res) {
+        // Update the issue
+        id = res.body._id
+        chai
+          .request(server)
+          .keepOpen()
+          .put('/api/issues/test_project')
+          .send({
+            _id: id,
+          })
+          .end(function (err, res) {
+            assert.equal(res.body.error, 'no update field(s) sent')
+            assert.equal(res.body._id, id)
+            done();
+          });
+      });
+  });
+
+  test('put invalid id', function (done) {
+    let id = '123'
+    chai
+      .request(server)
+      .keepOpen()
+      .put('/api/issues/test_project')
+      .send({
+        _id: id,
+        issue_title: "test put invalid id",
+      })
+      .end(function (err, res) {
+        assert.equal(res.body.error, 'could not update')
+        assert.equal(res.body._id, id)
+        done();
+      });
+  });
+
 });
